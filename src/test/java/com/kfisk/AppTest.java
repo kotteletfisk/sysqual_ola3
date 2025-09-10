@@ -1,19 +1,127 @@
 package com.kfisk;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit test for simple App.
- */
 public class AppTest {
 
-    /**
-     * Rigorous Test :-)
-     */
+    private final String TESTDB_URL = "jdbc:sqlite:src/test/java/test.db";
+    PersistenceManager pm = new PersistenceManager();
+
     @Test
-    public void shouldAnswerWithTrue() {
-        assertTrue(true);
+    @BeforeEach
+    public void DBConnectionTest() {
+
+        try (var c = DriverManager.getConnection(TESTDB_URL)) {
+            pm.initDB(c);
+
+        } catch (SQLException e) {
+            fail("Failed to connect to db: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void createTaskTest() {
+
+        String testName = "create_test";
+        Task t = new Task(testName, false);
+
+        try (var c = DriverManager.getConnection(TESTDB_URL)) {
+            pm.createTask(t, c);
+
+        } catch (SQLException e) {
+            fail("Failed to connect to db: " + e.getMessage());
+        }
+
+        String checkSql = "SELECT title, isCompleted FROM tasks WHERE title = ?";
+
+        try (var c = DriverManager.getConnection(TESTDB_URL)) {
+
+            try (var pstmt = c.prepareStatement(checkSql)) {
+
+                pstmt.setString(1, testName);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    Task queriedT = new Task(rs.getString("title"), rs.getBoolean("isCompleted"));
+                    assertNotNull(queriedT);
+                    assertEquals(t, queriedT);
+                } else {
+                    fail("No result found for: " + testName);
+                }
+            }
+
+        } catch (SQLException e) {
+            fail("Failed to connect to db: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void updateTaskTest() {
+
+        String testTitle = "UpdateTest";
+        String insertSql = "INSERT INTO tasks VALUES(?, ?)";
+
+        try (var c = DriverManager.getConnection(TESTDB_URL)) {
+            try (var pstmt = c.prepareStatement(insertSql)) {
+
+                pstmt.setString(1, testTitle);
+                pstmt.setBoolean(2, false);
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                fail("Failed to insert test-scenario: " + e.getMessage());
+            }
+
+            pm.setCompletion(true, testTitle, c);
+
+            String querySql = "SELECT isCompleted FROM tasks WHERE title = ?";
+
+            try (var pstmt = c.prepareStatement(querySql)) {
+
+                pstmt.setString(1, testTitle);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    assertEquals(true, rs.getBoolean("isCompleted"));
+                }
+            } catch (SQLException e) {
+                fail("Failed to insert test-scenario: " + e.getMessage());
+            }
+
+        } catch (SQLException e) {
+            fail("Failed to get connection: " + e.getMessage());
+        }
+
+    }
+
+    @Test
+    void getAllTasksTest() {
+        String[] testTitles = {"getalltest1", "getalltest2", "getalltest3"};
+
+        String insertSql = "INSERT INTO tasks (title, isCompleted) VALUES (?, ?)";
+
+        try (var c = DriverManager.getConnection(TESTDB_URL)) {
+            for (int i = 0; i < testTitles.length; i++) {
+                try (var pstmt = c.prepareStatement(insertSql)) {
+
+                    pstmt.setString(1, testTitles[i]);
+                    pstmt.setBoolean(2, false);
+                    pstmt.executeUpdate();
+                } catch (SQLException e) {
+                    fail("Failed to insert test-scenario: " + e.getMessage());
+                }
+            }
+        } catch (SQLException e) {
+            fail("Failed to connect to db: " + e.getMessage());
+        }
+
+        // TODO: FETCH
     }
 }
