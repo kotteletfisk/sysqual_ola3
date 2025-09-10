@@ -8,8 +8,6 @@
     <version>1.0-SNAPSHOT</version>
 
     <name>sysqual_OLA2</name>
-    <!-- FIXME change it to the project's website -->
-    <url>http://www.example.com</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,7 +27,7 @@
     </dependencyManagement>
 
     <dependencies>
-    <!-- Junit -->
+        <!-- Junit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -54,6 +52,13 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.13</version>
+        </dependency>
+        <!-- Javalin -->
+        <!-- https://mvnrepository.com/artifact/io.javalin/javalin -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>6.7.0</version>
         </dependency>
     </dependencies>
 
