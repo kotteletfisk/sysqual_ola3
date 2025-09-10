@@ -3,6 +3,7 @@ package com.kfisk;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -76,7 +77,7 @@ public class AppTest {
                 pstmt.setBoolean(2, false);
                 pstmt.executeUpdate();
             } catch (SQLException e) {
-                fail("Failed to insert test-scenario: " + e.getMessage());
+                fail("Failed to insert test-task: " + e.getMessage());
             }
 
             pm.setCompletion(true, testTitle, c);
@@ -115,13 +116,53 @@ public class AppTest {
                     pstmt.setBoolean(2, false);
                     pstmt.executeUpdate();
                 } catch (SQLException e) {
-                    fail("Failed to insert test-scenario: " + e.getMessage());
+                    fail("Failed to insert test-task: " + e.getMessage());
                 }
             }
+
+            List<Task> res = pm.getAllTasks(c);
+            assertEquals(testTitles.length, res.size());
+
         } catch (SQLException e) {
             fail("Failed to connect to db: " + e.getMessage());
         }
+    }
 
-        // TODO: FETCH
+    @Test
+    void deleteTask() {
+        String testTitle = "DeleteTest";
+        String insertSql = "INSERT INTO tasks VALUES(?, ?)";
+
+        try (var c = DriverManager.getConnection(TESTDB_URL)) {
+            try (var pstmt = c.prepareStatement(insertSql)) {
+
+                pstmt.setString(1, testTitle);
+                pstmt.setBoolean(2, false);
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                fail("Failed to insert test-task: " + e.getMessage());
+            }
+
+            pm.deleteTask(testTitle, c);
+
+            String querySQL = "SELECT * FROM tasks WHERE title = ?";
+
+            try (var pstmt = c.prepareStatement(querySQL)) {
+
+                pstmt.setString(1, testTitle);
+
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    fail("Deleted result was found!");
+                }
+                
+            } catch (SQLException e) {
+                fail("Failed to insert test-task: " + e.getMessage());
+            }
+
+        } catch (SQLException e) {
+            fail("Failed to connect to db: " + e.getMessage());
+        }
     }
 }

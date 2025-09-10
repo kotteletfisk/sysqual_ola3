@@ -72,4 +72,15 @@ public class PersistenceManager {
         }
         return output;
     }
+
+    public void deleteTask(String title, Connection c) throws SQLException {
+        
+        String sql = "DELETE FROM tasks WHERE title = ?";
+
+        try (var pstmt = c.prepareStatement(sql)) {
+
+            pstmt.setString(1, title);
+            pstmt.executeUpdate();
+        }
+    }
 }
