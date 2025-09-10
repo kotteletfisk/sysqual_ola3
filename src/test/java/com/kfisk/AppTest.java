@@ -3,10 +3,13 @@ package com.kfisk;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,8 @@ public class AppTest {
 
     private final String TESTDB_URL = "jdbc:sqlite:src/test/java/test.db";
     PersistenceManager pm = new PersistenceManager();
+
+    // INTEGRATION *************************************************************************
 
     @Test
     @BeforeEach
@@ -165,4 +170,44 @@ public class AppTest {
             fail("Failed to connect to db: " + e.getMessage());
         }
     }
+
+    // UNIT **********************************************************************************
+    // Lets get better coverage!
+
+    @Test 
+    void taskOtherObjectComparisonTest() {
+
+        var task = new Task("test", false);
+        var thing = new HashSet<Object>();
+
+        assertFalse(task.equals(thing));
+    }
+    
+    @Test 
+    void taskSameObjectOtherBoolComparisonTest() {
+
+        var task = new Task("test", false);
+        var thing = new Task("test", true);
+
+        assertFalse(task.equals(thing));
+    }
+
+    @Test 
+    void taskSameObjectOtherTitleComparisonTest() {
+
+        var task = new Task("test", false);
+        var thing = new Task("diff", false);
+
+        assertFalse(task.equals(thing));
+    }
+
+    @Test 
+    void taskSameObjectComparisonTest() {
+
+        var task = new Task("test", false);
+        var thing = new Task("test", false);
+
+        assertTrue(task.equals(thing));
+    }
+
 }

@@ -36,7 +36,7 @@ public class PersistenceManager {
         try (var pstmt = c.prepareStatement(sql)) {
 
             pstmt.setString(1, t.title);
-            pstmt.setInt(2, t.isCompleted ? 1 : 0);
+            pstmt.setBoolean(2, t.isCompleted);
             pstmt.executeUpdate();
         }
     }
