@@ -2,6 +2,11 @@
 
 ### Made by
 
+- Lasse Hansen - cph-lh479@stud.ek.dk
+- Pelle Hald Vedsmand - cph-pv73@stud.ek.dk
+- Nicolai Rosendahl - cph-nr135@stud.ek.dk
+
+
 ## Objective of assignment: 
 Students will build a simple REST API, implement tests for its endpoints, ensure code 
 coverage, and conduct basic performance testing. This will involve using tools like 
@@ -37,6 +42,7 @@ Raw results are located [here](perf-tests/results.jtl)
 HTML report is located [here](perf-tests/report/index.html)
 
 ### Reflection page
+The reflection document is found [here](documentation/OLA2_reflection-4.pdf).
 
 ### Test plan
 The test plan is located [here](documentation/Testplan.pdf), and describes the specific test plan for this project, including the different types of tests, objectives and goals, alongside the tools used.
