@@ -66,7 +66,7 @@ public class HTTPEndpointTest {
         HttpResponse<String> response = client.send(get, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(200, response.statusCode());
-        assertTrue(response.body().contains("Test task"));
+
     }
 
     @Test

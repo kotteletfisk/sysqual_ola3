@@ -173,7 +173,7 @@ $(document).ready(function() {
     });
 
     // Creates APDEX table
-    createTable($("#apdexTable"), {"supportsControllersDiscrimination": true, "overall": {"data": [0.98355, 500, 1500, "Total"], "isController": false}, "titles": ["Apdex", "T (Toleration threshold)", "F (Frustration threshold)", "Label"], "items": [{"data": [0.98355, 500, 1500, "Load test 100 users 100 requests each - getAllTasks"], "isController": false}]}, function(index, item){
+    createTable($("#apdexTable"), {"supportsControllersDiscrimination": true, "overall": {"data": [0.9849, 500, 1500, "Total"], "isController": false}, "titles": ["Apdex", "T (Toleration threshold)", "F (Frustration threshold)", "Label"], "items": [{"data": [0.9849, 500, 1500, "Load test 100 users 100 requests each - getAllTasks"], "isController": false}]}, function(index, item){
         switch(index){
             case 0:
                 item = item.toFixed(3);
@@ -187,7 +187,7 @@ $(document).ready(function() {
     }, [[0, 0]], 3);
 
     // Create statistics table
-    createTable($("#statisticsTable"), {"supportsControllersDiscrimination": true, "overall": {"data": ["Total", 10000, 0, 0.0, 1152.7939999999967, 2, 69770, 26.0, 49.0, 58.0, 69118.88, 47.19162631782616, 12.258762305216564, 6.498065733216299], "isController": false}, "titles": ["Label", "#Samples", "FAIL", "Error %", "Average", "Min", "Max", "Median", "90th pct", "95th pct", "99th pct", "Transactions/s", "Received", "Sent"], "items": [{"data": ["Load test 100 users 100 requests each - getAllTasks", 10000, 0, 0.0, 1152.7939999999967, 2, 69770, 26.0, 49.0, 58.0, 69118.88, 47.19162631782616, 12.258762305216564, 6.498065733216299], "isController": false}]}, function(index, item){
+    createTable($("#statisticsTable"), {"supportsControllersDiscrimination": true, "overall": {"data": ["Total", 10000, 0, 0.0, 1063.2455999999963, 2, 69756, 22.0, 40.0, 46.0, 68810.94, 46.8937575030012, 12.181386226365547, 6.45705059367497], "isController": false}, "titles": ["Label", "#Samples", "FAIL", "Error %", "Average", "Min", "Max", "Median", "90th pct", "95th pct", "99th pct", "Transactions/s", "Received", "Sent"], "items": [{"data": ["Load test 100 users 100 requests each - getAllTasks", 10000, 0, 0.0, 1063.2455999999963, 2, 69756, 22.0, 40.0, 46.0, 68810.94, 46.8937575030012, 12.181386226365547, 6.45705059367497], "isController": false}]}, function(index, item){
         switch(index){
             // Errors pct
             case 3:
