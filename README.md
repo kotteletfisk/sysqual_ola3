@@ -20,7 +20,9 @@ Unit tests and integration tests are found [here](src/test/java/com/kfisk/AppTes
 There is automated endpoint tests located [here](src/test/java/com/kfisk/HTTPEndpointTest.java). These tests also uses the test DB, however for this case the API has been build as a docker image and the tests are the conducted on a closed test environment. So keep in mind a docker installation or docker desktop (for windows) is needed to run these tests.
 
 ### Code coverage report, minimum 80% coverage
+The Jacoco code coverage report is located [here](documentation/jacocoReport.html).
 
+We managed to get a code coverage of 97% on persistence and business logic, however keep in mind that the testing of API endpoints, configuration and handlers are not included in the report, as those tests are run in a docker container, which Jacoco is not able to track.
 
 ### JMeter Test plan and load rest results
 The JMeter test plan is located [here](perf-tests/test-plan.jmx) and is boiled down to 4 steps:
@@ -37,3 +39,4 @@ HTML report is located [here](perf-tests/report/index.html)
 ### Reflection page
 
 ### Test plan
+The test plan is located [here](documentation/Testplan.pdf), and describes the specific test plan for this project, including the different types of tests, objectives and goals, alongside the tools used.
