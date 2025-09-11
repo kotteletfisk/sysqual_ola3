@@ -15,7 +15,7 @@
 
       <!-- Thread group is how many concurrent triggers we want - in this case it is the amount of "users" that are sending requests to the API concurently -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Users" enabled="true">
-        <stringProp name="ThreadGroup.num_threads">10</stringProp>
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
         <stringProp name="ThreadGroup.ramp_time">5</stringProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
 
@@ -31,14 +31,14 @@
 
         <!-- HTTP sampler is the part of the plan that handles where the requests are going and sending them -->
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy"
-                          testname="" enabled="true">
+                          testname="Load test 100 users 100 requests each - getAllTasks" enabled="true">
           <!-- In our case everything is on localhost port 7000 -->
           <stringProp name="HTTPSampler.domain">${__P(API_HOST,localhost)}</stringProp>
           <stringProp name="HTTPSampler.port">${__P(API_PORT,7000)}</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
           <!-- TODO: insert path for API and request method, alongside giving the test a proper name -->
-          <stringProp name="HTTPSampler.path">/</stringProp>
-          <stringProp name="HTTPSampler.method"></stringProp>
+          <stringProp name="HTTPSampler.path">/api/getAllTasks</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
         </HTTPSamplerProxy>
         <hashTree/>
 

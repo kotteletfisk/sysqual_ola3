@@ -13,6 +13,9 @@ public class Task {
     public String title;
     public boolean isCompleted;
 
+    // Default constructor which Jackson needs to deserialize JSON
+    public Task(){}
+
     public Task(String title, boolean isCompleted) {
         this.title = title;
         this.isCompleted = isCompleted;

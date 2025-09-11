@@ -2,30 +2,32 @@ package com.kfisk;
 
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
-import java.nio.file.Paths;
+import java.io.IOException;
 
 public class PerfTest {
 
     @Test
     void runLoadTest() throws Exception {
-        ImageFromDockerfile apiImage = new ImageFromDockerfile()
-                .withFileFromPath(".", Paths.get("."));
-
-        try (GenericContainer<?> api = new GenericContainer<>(apiImage)
+        try (GenericContainer<?> api = new GenericContainer<>("taskmanageapi:test")
+                .withEnv("APP_ENV", "test")
+                .withCopyFileToContainer(
+                        MountableFile.forHostPath("perf-tests/test.db"),
+                        "/data/test.db")
                 .withExposedPorts(7000)) {
 
             api.start();
             int mappedPort = api.getMappedPort(7000);
-            String apiHost = api.getHost();
 
             File reportDir = new File("perf-tests/report");
-            if (reportDir.exists()) {
-                for (File f : reportDir.listFiles()) f.delete();
-            } else {
-                reportDir.mkdirs();
+            deleteDirectoryRecursively(reportDir);
+            reportDir.mkdirs();
+
+            File resultsFile = new File("perf-tests/results.jtl");
+            if (resultsFile.exists() && !resultsFile.delete()) {
+                throw new IOException("Failed to delete previous results file: " + resultsFile.getAbsolutePath());
             }
 
             ProcessBuilder pb = new ProcessBuilder(
@@ -35,7 +37,7 @@ public class PerfTest {
                     "justb4/jmeter",
                     "-n",
                     "-t", "test-plan.jmx",
-                    "-JAPI_HOST=" + apiHost,
+                    "-JAPI_HOST=host.docker.internal",
                     "-JAPI_PORT=" + mappedPort,
                     "-l", "results.jtl",
                     "-e", "-o", "report"
@@ -48,5 +50,24 @@ public class PerfTest {
             }
         }
     }
-}
 
+    private void deleteDirectoryRecursively(File dir) throws IOException {
+        if (dir.exists()) {
+            File[] contents = dir.listFiles();
+            if (contents != null) {
+                for (File f : contents) {
+                    if (f.isDirectory()) {
+                        deleteDirectoryRecursively(f);
+                    } else {
+                        if (!f.delete()) {
+                            throw new IOException("Failed to delete file: " + f.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+            if (!dir.delete()) {
+                throw new IOException("Failed to delete directory: " + dir.getAbsolutePath());
+            }
+        }
+    }
+}
