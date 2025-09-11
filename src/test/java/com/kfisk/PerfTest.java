@@ -1,10 +1,10 @@
 package com.kfisk;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -35,16 +35,23 @@ public class PerfTest {
                 throw new IOException("Failed to delete previous results file: " + resultsFile.getAbsolutePath());
             }
 
-            String uid = new ProcessBuilder("id", "-u").start()
-                    .inputReader().readLine();
-            String gid = new ProcessBuilder("id", "-g").start()
-                    .inputReader().readLine();
-            
-            System.out.println("Read user: " + uid + ":" + gid);
+            String os = System.getProperty("os.name").toLowerCase();
+            String userFlag = "";
 
-            ProcessBuilder pb = new ProcessBuilder(
-                    "docker", "run", "--rm",
-                   // "-u", uid + ":" + gid,
+            /* 
+             * If tests are run on linux, we have to specify a user to run the test container.
+             * Otherwise the container creates files as root, creating issues on host machine
+            */
+            if (os.contains("linux")) {
+                String uid = new ProcessBuilder("id", "-u").start()
+                        .inputReader().readLine();
+                String gid = new ProcessBuilder("id", "-g").start()
+                        .inputReader().readLine();
+                userFlag = uid + ":" + gid;
+            }
+
+            List<String> commands = new ArrayList<>();
+            commands.addAll(Arrays.asList("docker", "run", "--rm",
                     "-v", new File("perf-tests").getAbsolutePath() + ":/jmeter",
                     "-w", "/jmeter",
                     "justb4/jmeter",
@@ -53,14 +60,16 @@ public class PerfTest {
                     "-JAPI_HOST=host.docker.internal",
                     "-JAPI_PORT=" + mappedPort,
                     "-l", "results.jtl",
-                    "-e", "-o", "report"
-            );
+                    "-e", "-o", "report"));
+
+            if (!userFlag.isEmpty()) {
+                commands.add("-u");
+                commands.add(userFlag);
+            }
+
+            ProcessBuilder pb = new ProcessBuilder(commands);
             pb.inheritIO();
             Process proc = pb.start();
-            streamOutput(proc.getInputStream(), "[Jmeter-stdout]: ");
-            streamOutput(proc.getErrorStream(), "[Jmeter-stderr]: ");
-
-
             int exit = proc.waitFor();
             if (exit != 0) {
                 throw new RuntimeException("JMeter test failed. Exit Status: " + exit);
@@ -87,17 +96,4 @@ public class PerfTest {
             }
         }
     }
-
-    private static void streamOutput(InputStream input, String prefix) {
-    new Thread(() -> {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(prefix + line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }).start();
-}
 }
