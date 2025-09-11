@@ -1,11 +1,14 @@
 package com.kfisk;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.MountableFile;
-
-import java.io.File;
-import java.io.IOException;
 
 public class PerfTest {
 
@@ -22,16 +25,26 @@ public class PerfTest {
             int mappedPort = api.getMappedPort(7000);
 
             File reportDir = new File("perf-tests/report");
+
             deleteDirectoryRecursively(reportDir);
             reportDir.mkdirs();
 
             File resultsFile = new File("perf-tests/results.jtl");
+
             if (resultsFile.exists() && !resultsFile.delete()) {
                 throw new IOException("Failed to delete previous results file: " + resultsFile.getAbsolutePath());
             }
 
+            String uid = new ProcessBuilder("id", "-u").start()
+                    .inputReader().readLine();
+            String gid = new ProcessBuilder("id", "-g").start()
+                    .inputReader().readLine();
+            
+            System.out.println("Read user: " + uid + ":" + gid);
+
             ProcessBuilder pb = new ProcessBuilder(
                     "docker", "run", "--rm",
+                   // "-u", uid + ":" + gid,
                     "-v", new File("perf-tests").getAbsolutePath() + ":/jmeter",
                     "-w", "/jmeter",
                     "justb4/jmeter",
@@ -44,9 +57,13 @@ public class PerfTest {
             );
             pb.inheritIO();
             Process proc = pb.start();
+            streamOutput(proc.getInputStream(), "[Jmeter-stdout]: ");
+            streamOutput(proc.getErrorStream(), "[Jmeter-stderr]: ");
+
+
             int exit = proc.waitFor();
             if (exit != 0) {
-                throw new RuntimeException("JMeter test failed");
+                throw new RuntimeException("JMeter test failed. Exit Status: " + exit);
             }
         }
     }
@@ -70,4 +87,17 @@ public class PerfTest {
             }
         }
     }
+
+    private static void streamOutput(InputStream input, String prefix) {
+    new Thread(() -> {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(prefix + line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }).start();
+}
 }
