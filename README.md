@@ -20,7 +20,7 @@ We used Javalin to implement a simple REST API - all the code is found [here](sr
 The application is a simple prototype of a task manager, providing endpoints to cover the basic CRUD operations needed for a task.
 
 ### Unit tests, integration tests and HTTP test files
-Unit tests and integration tests are found [here](src/test/java/com/kfisk/AppTest.java) and is being tested up against a test SQLite DB, located [here](src/test/java/com/kfisk). The test DB doesn't have any data, as data is initialized on a per test level. The test DB therefore only contains the metadata and schema needed for a Task table reflecting the [Task class](src/main/java/com/kfisk/Task.java).
+Unit tests and integration tests are found [here](src/test/java/com/kfisk/AppTest.java) and is being tested up against a test SQLite DB, located [here](src/test/java/). The test DB doesn't have any data, as data is initialized on a per test level. The test DB therefore only contains the metadata and schema needed for a Task table reflecting the [Task class](src/main/java/com/kfisk/Task.java).
 
 There is automated endpoint tests located [here](src/test/java/com/kfisk/HTTPEndpointTest.java). These tests also uses the test DB, however for this case the API has been build as a docker image and the tests are the conducted on a closed test environment. So keep in mind a docker installation or docker desktop (for windows) is needed to run these tests.
 
