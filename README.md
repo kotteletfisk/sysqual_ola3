@@ -2,7 +2,7 @@
 
 ### Made by
 
-## Obejective of assignment: 
+## Objective of assignment: 
 Students will build a simple REST API, implement tests for its endpoints, ensure code 
 coverage, and conduct basic performance testing. This will involve using tools like 
 HTTP files, Rest Clients, and JMeter (or similar). Additionally, students will perform 
@@ -29,7 +29,10 @@ The JMeter test plan is located [here](perf-tests/test-plan.jmx) and is boiled d
 3. Loop Controller - used for defining how many times we want to loop through requests per user.
 4. HTTP Request - used for defining the actual request we want to send to the API.
 
+#### Results of the load test:
+Raw results are located [here](perf-tests/results.jtl)
 
+HTML report is located [here](perf-tests/report/index.html)
 
 ### Reflection page
 
