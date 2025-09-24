@@ -3,7 +3,8 @@ package com.kfisk;
 import io.javalin.Javalin;
 
 public class App {
-    public static void main(String[] args) throws Exception{
+
+    public static void main(String[] args) throws Exception {
 
         String env = System.getenv().getOrDefault("APP_ENV", "prod");
         String dbUrl;
@@ -22,6 +23,6 @@ public class App {
                 .put("/api/setTaskComplete", controller::setTaskComplete)
                 .delete("/api/deleteTask", controller::deleteTask)
                 .start(7000);
-    }
 
+    }
 }

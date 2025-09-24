@@ -6,6 +6,7 @@
 package com.kfisk;
 
 import io.javalin.http.Context;
+import io.javalin.validation.ValidationException;
 
 /**
  *
@@ -14,7 +15,7 @@ import io.javalin.http.Context;
 public class RequestValidator {
 
     // Not really testable?
-    public Task validateForCreation(Context ctx) {
+    public Task validateForCreation(Context ctx) throws ValidationException {
         return ctx.bodyValidator(Task.class)
                     .check(task -> task.title.length() > 0, "Title must be a least one character")
                     .check(task -> !task.isCompleted, "Task cannot be created as completed")

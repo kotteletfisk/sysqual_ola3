@@ -1,9 +1,9 @@
 package com.kfisk;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 
 public class RouteController {
 
@@ -19,25 +19,25 @@ public class RouteController {
             List<Task> tasks = dao.getAllTasks();
             ctx.json(tasks);
         } catch (Exception e) {
-            ctx.status(500).result("Error fetching tasks");
+            ctx.status(500).result("Error fetching tasks: " + e.getMessage());
         }
     }
 
     public void createTask(Context ctx) {
         try {
 
-            // Task task = validator.validateForCreation(ctx); 
-            Task task = ctx.bodyAsClass(Task.class);
+            Task task = validator.validateForCreation(ctx);
+            // Task task = ctx.bodyAsClass(Task.class);
 
-            if (validator.validateForCreation(task)) {
-                dao.createTask(task);
-                ctx.status(201).json(task);
-            } else {
-                ctx.status(HttpStatus.BAD_REQUEST)
-                    .result("Bad input: " + task.toString());
-            }
-        } catch (Exception e) {
-            ctx.status(500).result("Error creating task");
+            // if (validator.validateForCreation(task)) {
+            dao.createTask(task);
+            ctx.status(201).json(task);
+            // } else {
+            //     ctx.status(HttpStatus.BAD_REQUEST)
+            //         .result("Bad input: " + task.toString());
+            // }
+        } catch (SQLException e) {
+            ctx.status(500).result("Error creating task: " + e.getMessage());
         }
     }
 
@@ -46,7 +46,7 @@ public class RouteController {
             Task input = ctx.bodyAsClass(Task.class);
             dao.setCompletion(input.isCompleted, input.title);
             ctx.status(200).result("Task updated");
-        } catch (Exception e) {
+        } catch (SQLException e) {
             ctx.status(500).result("Error updating task");
         }
     }
