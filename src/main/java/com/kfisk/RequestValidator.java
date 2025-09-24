@@ -13,10 +13,15 @@ import io.javalin.http.Context;
  */
 public class RequestValidator {
 
+    // Not really testable?
     public Task validateForCreation(Context ctx) {
         return ctx.bodyValidator(Task.class)
                     .check(task -> task.title.length() > 0, "Title must be a least one character")
                     .check(task -> !task.isCompleted, "Task cannot be created as completed")
                     .get();
+    }
+
+    public boolean validateForCreation(Task t) {
+        return (!t.isCompleted) && t.title.length() > 0;
     }
 }

@@ -13,21 +13,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import org.mockito.junit.jupiter.MockitoExtension;
+
+
+@ExtendWith(MockitoExtension.class)
 public class AppTest {
 
     private final String TESTDB_URL = "jdbc:sqlite:src/test/java/test.db";
-    PersistenceManager pm = new PersistenceManager();
+    PersistenceManager pm = new PersistenceManager(TESTDB_URL);
 
     // INTEGRATION *************************************************************************
-
     @Test
     @BeforeEach
     public void DBConnectionTest() {
 
-        try (var c = DriverManager.getConnection(TESTDB_URL)) {
-            pm.initDB(c);
-
+        try {
+            pm.initDB();
         } catch (SQLException e) {
             fail("Failed to connect to db: " + e.getMessage());
         }
@@ -39,8 +42,8 @@ public class AppTest {
         String testName = "create_test";
         Task t = new Task(testName, false);
 
-        try (var c = DriverManager.getConnection(TESTDB_URL)) {
-            pm.createTask(t, c);
+        try {
+            pm.createTask(t);
 
         } catch (SQLException e) {
             fail("Failed to connect to db: " + e.getMessage());
@@ -49,7 +52,6 @@ public class AppTest {
         String checkSql = "SELECT title, isCompleted FROM tasks WHERE title = ?";
 
         try (var c = DriverManager.getConnection(TESTDB_URL)) {
-
             try (var pstmt = c.prepareStatement(checkSql)) {
 
                 pstmt.setString(1, testName);
@@ -85,7 +87,7 @@ public class AppTest {
                 fail("Failed to insert test-task: " + e.getMessage());
             }
 
-            pm.setCompletion(true, testTitle, c);
+            pm.setCompletion(true, testTitle);
 
             String querySql = "SELECT isCompleted FROM tasks WHERE title = ?";
 
@@ -125,7 +127,7 @@ public class AppTest {
                 }
             }
 
-            List<Task> res = pm.getAllTasks(c);
+            List<Task> res = pm.getAllTasks();
             assertEquals(testTitles.length, res.size());
 
         } catch (SQLException e) {
@@ -148,7 +150,7 @@ public class AppTest {
                 fail("Failed to insert test-task: " + e.getMessage());
             }
 
-            pm.deleteTask(testTitle, c);
+            pm.deleteTask(testTitle);
 
             String querySQL = "SELECT * FROM tasks WHERE title = ?";
 
@@ -161,7 +163,7 @@ public class AppTest {
                 if (rs.next()) {
                     fail("Deleted result was found!");
                 }
-                
+
             } catch (SQLException e) {
                 fail("Failed to insert test-task: " + e.getMessage());
             }
@@ -173,8 +175,7 @@ public class AppTest {
 
     // UNIT **********************************************************************************
     // Lets get better coverage!
-
-    @Test 
+    @Test
     void taskOtherObjectComparisonTest() {
 
         var task = new Task("test", false);
@@ -182,8 +183,8 @@ public class AppTest {
 
         assertFalse(task.equals(thing));
     }
-    
-    @Test 
+
+    @Test
     void taskSameObjectOtherBoolComparisonTest() {
 
         var task = new Task("test", false);
@@ -192,7 +193,7 @@ public class AppTest {
         assertFalse(task.equals(thing));
     }
 
-    @Test 
+    @Test
     void taskSameObjectOtherTitleComparisonTest() {
 
         var task = new Task("test", false);
@@ -201,7 +202,7 @@ public class AppTest {
         assertFalse(task.equals(thing));
     }
 
-    @Test 
+    @Test
     void taskSameObjectComparisonTest() {
 
         var task = new Task("test", false);
@@ -210,4 +211,37 @@ public class AppTest {
         assertTrue(task.equals(thing));
     }
 
+    @Test
+    void ctxValidationCorrectTest() {
+
+        // setup
+        Task t = new Task("test", false);
+        RequestValidator rv = new RequestValidator();
+
+        assertTrue(rv.validateForCreation(t));
+    }
+
+    @Test
+    void ctxValidationEmptyTitleTest() {
+
+        // setup
+        Task t = new Task("", false);
+        RequestValidator rv = new RequestValidator();
+        System.out.println("title: " + t.title);
+        System.out.println("length: " + t.title.length());
+
+        assertFalse(rv.validateForCreation(t));
+    }    
+
+    @Test
+    void ctxValidationWrongCompletedTest() {
+
+        // setup
+        Task t = new Task("test", true);
+        RequestValidator rv = new RequestValidator();
+        System.out.println("title: " + t.title);
+        System.out.println("length: " + t.title.length());
+
+        assertFalse(rv.validateForCreation(t));
+    }
 }

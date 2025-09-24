@@ -1,18 +1,20 @@
 package com.kfisk;
 
-import org.junit.jupiter.api.*;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.utility.MountableFile;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.MountableFile;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class HTTPEndpointTest {
@@ -20,8 +22,6 @@ public class HTTPEndpointTest {
     static GenericContainer<?> api;
     static HttpClient client;
     static String baseUrl;
-
-    Connection conn;
     PersistenceManager dao;
 
     @BeforeAll
@@ -40,21 +40,19 @@ public class HTTPEndpointTest {
         baseUrl = "http://" + host + ":" + mappedPort + "/api";
         client = HttpClient.newHttpClient();
 
-        conn = DriverManager.getConnection("jdbc:sqlite:src/test/java/test.db");
-        dao = new PersistenceManager();
+        dao = new PersistenceManager("jdbc:sqlite:src/test/java/test.db");
     }
 
     @AfterAll
     void stopContainer() throws Exception {
-        dao.initDB(conn);
-        conn.close();
+        dao.initDB();
         api.stop();
     }
 
     @BeforeEach
     void resetDb() throws Exception {
-        conn.createStatement().executeUpdate("DELETE FROM tasks");
-        dao.createTask(new Task("Test task", false), conn);
+        dao.initDB();
+        dao.createTask(new Task("Test task", false));
     }
 
     @Test

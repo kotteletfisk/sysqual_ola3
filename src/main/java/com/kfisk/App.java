@@ -1,8 +1,6 @@
 package com.kfisk;
 
 import io.javalin.Javalin;
-import java.sql.Connection;
-import java.sql.DriverManager;
 
 public class App {
     public static void main(String[] args) throws Exception{
@@ -16,9 +14,7 @@ public class App {
             dbUrl = "jdbc:sqlite:/data/test.db";
         }
 
-        Connection conn = DriverManager.getConnection(dbUrl);
-
-        var controller = new RouteController(conn);
+        var controller = new RouteController(new PersistenceManager(dbUrl));
 
         var app = Javalin.create()
                 .get("/api/getAllTasks", controller::getAllTasks)
