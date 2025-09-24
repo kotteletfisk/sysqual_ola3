@@ -1,13 +1,15 @@
 package com.kfisk;
-import io.javalin.http.Context;
 import java.sql.Connection;
 import java.util.List;
+
+import io.javalin.http.Context;
 
 public class RouteController {
 
 
         private final Connection conn;
         private final PersistenceManager dao = new PersistenceManager();
+        private final RequestValidator validator = new RequestValidator();
 
         public RouteController(Connection conn) {
             this.conn = conn;
@@ -24,7 +26,9 @@ public class RouteController {
 
         public void createTask(Context ctx) {
             try {
-                Task task = ctx.bodyAsClass(Task.class);
+
+                Task task = validator.validateForCreation(ctx); 
+                // Task task = ctx.bodyAsClass(Task.class);
                 dao.createTask(task, conn);
                 ctx.status(201).json(task);
             } catch (Exception e) {
