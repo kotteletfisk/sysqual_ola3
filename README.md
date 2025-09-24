@@ -8,10 +8,8 @@
 
 
 ## Objective of assignment: 
-Students will build a simple REST API, implement tests for its endpoints, ensure code 
-coverage, and conduct basic performance testing. This will involve using tools like 
-HTTP files, Rest Clients, and JMeter (or similar). Additionally, students will perform 
-basic benchmarking of their API’s performance.
+
+TODO
 
 ## Deliverables: 
 
