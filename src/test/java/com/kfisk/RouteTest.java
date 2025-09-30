@@ -1,6 +1,5 @@
 package com.kfisk;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -211,8 +210,8 @@ public class RouteTest {
 
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("deleted"));
-    }   
-    
+    }
+
     @Test
     void deletaskNotFoundTest() throws Exception {
 
@@ -220,7 +219,7 @@ public class RouteTest {
         doThrow(new SQLException())
                 .when(pm)
                 .deleteTask("Nonexistent");
-        
+
         // test
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/deleteTask"))
@@ -231,4 +230,108 @@ public class RouteTest {
 
         assertEquals(500, response.statusCode());
     }
+
+    // Boundary Analysis on API input ************************************************************
+    /* 
+    * Boundary Value analysis on task titles:
+    *
+    * Should be minimum 1 letter, and maximum 20 letters.
+    * 
+    * We can split title input into 4 equilavence partitions:
+    *
+    * | < 1 (Invalid) | => 1 AND <= 20 (Valid) | > 20 (Invalid) | Not UTF-8 valid (Invalid) |
+    * 
+    * Can be covered by 4 tests. 1 for each partition
+    * One is already covered above, by failing if title is empty.
+     */
+    @Test
+    void validTitleLowerBoundaryTest() {
+
+        // 1 character valid
+        String json = """
+                {"title":"1","isCompleted":false}
+                """;
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/createTask"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(201, response.statusCode());
+
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    void validTitleUpperBoundaryTest() {
+
+        // 20 characters valid
+        String json = """
+                {"title":"qwertyuiopasdfghjklz","isCompleted":false}
+                """;
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/createTask"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(201, response.statusCode());
+
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    void invalidTitleBoundaryTest() {
+
+        // 21 characters invalid
+        String json = """
+                {"title":"qwertyuiopasdfghjklz1","isCompleted":false}
+                """;
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/createTask"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        HttpResponse<String> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(400, response.statusCode());
+
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    void invalidUTF8Test() {
+
+        byte[] invalid = new byte[]{(byte) 0xC3, (byte) 0x28}; // invalid UTF-8
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/createTask"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofByteArray(invalid))
+                .build();
+
+        HttpResponse<String> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            assertEquals(400, response.statusCode());
+
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
 }

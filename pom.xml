@@ -144,7 +144,6 @@
                 <configuration>
                     <excludes>
                         <exclude>**/App*</exclude>
-                        <exclude>**/RouteController*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

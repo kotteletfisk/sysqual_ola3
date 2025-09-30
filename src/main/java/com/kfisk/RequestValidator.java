@@ -18,6 +18,7 @@ public class RequestValidator {
     public Task validateForCreation(Context ctx) throws ValidationException {
         return ctx.bodyValidator(Task.class)
                     .check(task -> task.title.length() > 0, "Title must be a least one character")
+                    .check(task -> task.title.length() <= 20, "Title must 20 characters maximum")
                     .check(task -> !task.isCompleted, "Task cannot be created as completed")
                     .get();
     }

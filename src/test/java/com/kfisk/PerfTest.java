@@ -41,17 +41,25 @@ public class PerfTest {
             /* 
              * If tests are run on linux, we have to specify a user to run the test container.
              * Otherwise the container creates files as root, creating issues on host machine
-            */
+             */
             if (os.contains("linux")) {
                 String uid = new ProcessBuilder("id", "-u").start()
                         .inputReader().readLine();
                 String gid = new ProcessBuilder("id", "-g").start()
                         .inputReader().readLine();
                 userFlag = uid + ":" + gid;
+                System.out.println("Linux Detected: Userflag set as: " + userFlag);
             }
 
             List<String> commands = new ArrayList<>();
-            commands.addAll(Arrays.asList("docker", "run", "--rm",
+            commands.addAll(Arrays.asList("docker", "run", "--rm"));
+
+            if (!userFlag.isEmpty()) {
+                commands.add("-u");
+                commands.add(userFlag);
+            }
+
+            commands.addAll(Arrays.asList(
                     "-v", new File("perf-tests").getAbsolutePath() + ":/jmeter",
                     "-w", "/jmeter",
                     "justb4/jmeter",
@@ -61,11 +69,6 @@ public class PerfTest {
                     "-JAPI_PORT=" + mappedPort,
                     "-l", "results.jtl",
                     "-e", "-o", "report"));
-
-            if (!userFlag.isEmpty()) {
-                commands.add("-u");
-                commands.add(userFlag);
-            }
 
             ProcessBuilder pb = new ProcessBuilder(commands);
             pb.inheritIO();
