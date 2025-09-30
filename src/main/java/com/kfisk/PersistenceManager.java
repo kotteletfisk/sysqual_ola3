@@ -17,10 +17,10 @@ import java.util.List;
  */
 public class PersistenceManager {
 
-    private final String DB_URL;
+    private final String DBURL;
 
-    public PersistenceManager(String DB_URL) {
-        this.DB_URL = DB_URL;
+    public PersistenceManager(String dburl) {
+        this.DBURL = dburl;
     }
 
     public void initDB() throws SQLException {
@@ -31,7 +31,7 @@ public class PersistenceManager {
                 + "	isCompleted INTEGER"
                 + ");";
 
-        try (Connection c = DriverManager.getConnection(DB_URL);) {
+        try (Connection c = DriverManager.getConnection(DBURL);) {
             var stmt = c.createStatement();
             stmt.execute(dropSql);
             stmt.execute(createSql);
@@ -42,7 +42,7 @@ public class PersistenceManager {
 
         String sql = "INSERT INTO tasks VALUES(?, ?)";
 
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
+        try (Connection c = DriverManager.getConnection(DBURL)) {
             var pstmt = c.prepareStatement(sql);
             pstmt.setString(1, t.title);
             pstmt.setBoolean(2, t.isCompleted);
@@ -54,7 +54,7 @@ public class PersistenceManager {
 
         String sql = "UPDATE tasks SET isCompleted = ? WHERE title = ?";
 
-        try (Connection c = DriverManager.getConnection(DB_URL)) {
+        try (Connection c = DriverManager.getConnection(DBURL)) {
             var pstmt = c.prepareStatement(sql);
             pstmt.setBoolean(1, isCompleted);
             pstmt.setString(2, title);
@@ -67,7 +67,7 @@ public class PersistenceManager {
 
         String sql = "SELECT title, isCompleted FROM tasks";
         List<Task> output = new ArrayList<>();
-        try (Connection c = DriverManager.getConnection(DB_URL);) {
+        try (Connection c = DriverManager.getConnection(DBURL);) {
 
             var stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -86,7 +86,7 @@ public class PersistenceManager {
 
         String sql = "DELETE FROM tasks WHERE title = ?";
 
-        try (Connection c = DriverManager.getConnection(DB_URL);) {
+        try (Connection c = DriverManager.getConnection(DBURL);) {
             var pstmt = c.prepareStatement(sql);
             pstmt.setString(1, title);
             pstmt.executeUpdate();

@@ -241,7 +241,7 @@ public class RouteTest {
     *
     * | < 1 (Invalid) | => 1 AND <= 20 (Valid) | > 20 (Invalid) | Not UTF-8 valid (Invalid) |
     * 
-    * Can be covered by 4 tests. 1 for each partition
+    * Can be covered by 5 tests. 1 for each boundary value.
     * One is already covered above, by failing if title is empty.
      */
     @Test

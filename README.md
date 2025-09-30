@@ -9,38 +9,81 @@
 
 ## Objective of assignment: 
 
-TODO
+In this assignment we will further enhance the code quality and test coverage of our Task application.
+We will implement mocking libraries for more efficiently being able to isolate parts of the program for unit testing. 
+use PMD as a static code analysis tool to help us enforce coding styles, good practices and potential bugs.
+
+Based on static code analysis and code reviews between programmers, we will refactor the codebase to enhance quality and testability.
 
 ## Deliverables: 
 
-### Source code for REST API
-We used Javalin to implement a simple REST API - all the code is found [here](src/main/java/com/kfisk).
-The application is a simple prototype of a task manager, providing endpoints to cover the basic CRUD operations needed for a task.
+-  Refined Task Service source code. 
+-  Unit tests (with mocks) for core functionality. 
+-  PMD report (or equivalent for C#). 
+-  JaCoCo coverage report (minimum 75%).
 
-### Unit tests, integration tests and HTTP test files
-Unit tests and integration tests are found [here](src/test/java/com/kfisk/AppTest.java) and is being tested up against a test SQLite DB, located [here](src/test/java/). The test DB doesn't have any data, as data is initialized on a per test level. The test DB therefore only contains the metadata and schema needed for a Task table reflecting the [Task class](src/main/java/com/kfisk/Task.java).
+## Process
 
-There is automated endpoint tests located [here](src/test/java/com/kfisk/HTTPEndpointTest.java). These tests also uses the test DB, however for this case the API has been build as a docker image and the tests are the conducted on a closed test environment. So keep in mind a docker installation or docker desktop (for windows) is needed to run these tests.
+### Mocking
+We decided we could use the Mockito library for mocking resources that in earlier iterations, that had been hard to test because of dependencies on other functionality. 
 
-### Code coverage report, minimum 80% coverage
-The Jacoco code coverage report is located [here](documentation/jacocoReport.html).
+The route controller had before only been tested in system tests. To better cover internal handling of HTTP-requests we decided to mock the persistance layer. During this, we found out we had unnecessary dependencies between database and our route controller, by a connection object. This made it hard to mock the Persistencemanager. We proceeded to refactor Routecontroller and PersistanceManager to decouple them, injecting our own logic instead of an SQL-tied object. 
 
-We managed to get a code coverage of 97% on persistence and business logic, however keep in mind that the testing of API endpoints, configuration and handlers are not included in the report, as those tests are run in a docker container, which Jacoco is not able to track.
+Now we could mock the PersistenceManager with Mockito, and create a test suite for the Isolated Javalin instance with route handling. 
 
-### JMeter Test plan and load rest results
-The JMeter test plan is located [here](perf-tests/test-plan.jmx) and is boiled down to 4 steps:
-1. The test plan wrapper - used for configuring and containing the test plan.
-2. Thread Group - used for defining the number of users we are simulating, the ramp up time and how to handle errors.
-3. Loop Controller - used for defining how many times we want to loop through requests per user.
-4. HTTP Request - used for defining the actual request we want to send to the API.
+We used this setup, for validating user input.
 
-#### Results of the load test:
-Raw results are located [here](perf-tests/results.jtl)
+### Boundary Analysis and Partition Equilavence
+We defined rules for input validation for task titles to be:
+- UTF-8 valid
+- At least 1 character
+- At most 20 characters
 
-HTML report is located [here](perf-tests/report/index.html)
+We group these into the following partitions:
 
-### Reflection page
-The reflection document is found [here](documentation/OLA2_reflection-4.pdf).
+| Invalid     | Valid                       | Invalid    | Invalid       |
+| ----------- | -----------                 | ---------- | ---------     |
+| input < 1   | input >= 1 AND input <= 20  | input > 20 | Invalid UTF-8 |
 
-### Test plan
-The test plan is located [here](documentation/Testplan.pdf), and describes the specific test plan for this project, including the different types of tests, objectives and goals, alongside the tools used.
+
+So we can cover the test cases with 5 boundary values.
+We implemented the tests with the boundary values 0, 1, 20, 21 and a UTF-invalid byte.
+
+Tests was implemented in [RouteTest.java](src/test/java/com/kfisk/RouteTest.java)
+
+### PMD - Static Code Analysis
+
+We implemented PMD report generation in the `mvn site` build cycle for static code analysis. We use the quickstart ruleset from PMD, since it covers most basic Java practices like unused imports, access modifier issues, unused variables etc.
+
+It generated a report where it had found some issues:
+- Variable name with bad characters
+- Unnecessary public constructor on Utility (Main) class
+- An unused Local variable
+
+Full initial report is found [here](documentation/pmd-before.html)
+
+We refactored the codebase to adress the priority 1. issues found. Post-refactor report is found [here](reports/pmd.html).
+
+### Code coverage report
+
+We had implemented Jacoco in our earlier assignment, and even with our new RouteController testsuite, we managed a coverage of 94% total. 
+
+Report is found [here](reports/jacoco/index.html).
+
+
+## Additional Reflection
+
+We find the static code analysis tools quite helpful, not only for discovering potential bugs and bad practices, but also for enforcing code styles. It's very useful it can be configured to fail a build on specified violations, forcing a homogenous code style across the codebase. 
+
+Coverage reports are useful as well, because it can be hard to identify the logical branching of code. it gives a clear indication of what is tested and not. 
+
+We found mocking to be bit gamechanging when it comes to writing testable code, and isolating logic. It makes it much easier to write unit tests with isolated logic. At the same time it helps us to write good testable good, by making sure things are decoupled enough to be mockable.
+
+The code reviewing process can be a bit tedious, since the time of at least two people have to be allocated, but it can be really helpful to have a second pair of eyes on a solution. Usually theres a lot of things that haven't been thought about, so both futureproofing the code, and having more of the team understanding what's going on in the codebase, can make sure we're all going in the same direction.
+
+I think think boundary analysis can be useful for clearly understanding fx user input restriction, and giving good test coverage early, but can also often be overkill since it deals with primitive data types. 
+Equilavence partitioning is likewise useful for understanding exact valid and invalid input groups, and potentially reducing the amount of tests needed to target a partition.
+
+for example, it made me realize that another invalid state than a too small or too large string length, might be that the input is a valid string at all. 
+
+

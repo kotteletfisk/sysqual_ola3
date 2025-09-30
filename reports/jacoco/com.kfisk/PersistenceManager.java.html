@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PersistenceManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">sysqual_OLA2</a> &gt; <a href="index.source.html" class="el_package">com.kfisk</a> &gt; <span class="el_source">PersistenceManager.java</span></div><h1>PersistenceManager.java</h1><pre class="source lang-java linenums">/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.kfisk;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author kotteletfisk
+ */
+public class PersistenceManager {
+
+    private final String DBURL;
+
+<span class="fc" id="L22">    public PersistenceManager(String DB_URL) {</span>
+<span class="fc" id="L23">        this.DBURL = DB_URL;</span>
+<span class="fc" id="L24">    }</span>
+
+    public void initDB() throws SQLException {
+
+<span class="fc" id="L28">        String dropSql = &quot;DROP TABLE IF EXISTS tasks;&quot;;</span>
+<span class="fc" id="L29">        String createSql = &quot;CREATE TABLE tasks (&quot;</span>
+                + &quot;	title TEXT PRIMARY KEY,&quot;
+                + &quot;	isCompleted INTEGER&quot;
+                + &quot;);&quot;;
+
+<span class="fc" id="L34">        try (Connection c = DriverManager.getConnection(DBURL);) {</span>
+<span class="fc" id="L35">            var stmt = c.createStatement();</span>
+<span class="fc" id="L36">            stmt.execute(dropSql);</span>
+<span class="fc" id="L37">            stmt.execute(createSql);</span>
+        }
+<span class="fc" id="L39">    }</span>
+
+    public void createTask(Task t) throws SQLException {
+
+<span class="fc" id="L43">        String sql = &quot;INSERT INTO tasks VALUES(?, ?)&quot;;</span>
+
+<span class="fc" id="L45">        try (Connection c = DriverManager.getConnection(DBURL)) {</span>
+<span class="fc" id="L46">            var pstmt = c.prepareStatement(sql);</span>
+<span class="fc" id="L47">            pstmt.setString(1, t.title);</span>
+<span class="fc" id="L48">            pstmt.setBoolean(2, t.isCompleted);</span>
+<span class="fc" id="L49">            pstmt.executeUpdate();</span>
+        }
+<span class="fc" id="L51">    }</span>
+
+    public void setCompletion(boolean isCompleted, String title) throws SQLException {
+
+<span class="fc" id="L55">        String sql = &quot;UPDATE tasks SET isCompleted = ? WHERE title = ?&quot;;</span>
+
+<span class="fc" id="L57">        try (Connection c = DriverManager.getConnection(DBURL)) {</span>
+<span class="fc" id="L58">            var pstmt = c.prepareStatement(sql);</span>
+<span class="fc" id="L59">            pstmt.setBoolean(1, isCompleted);</span>
+<span class="fc" id="L60">            pstmt.setString(2, title);</span>
+<span class="fc" id="L61">            pstmt.executeUpdate();</span>
+        }
+<span class="fc" id="L63">    }</span>
+
+    // output might be null!
+    public List&lt;Task&gt; getAllTasks() throws SQLException {
+
+<span class="fc" id="L68">        String sql = &quot;SELECT title, isCompleted FROM tasks&quot;;</span>
+<span class="fc" id="L69">        List&lt;Task&gt; output = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L70">        try (Connection c = DriverManager.getConnection(DBURL);) {</span>
+
+<span class="fc" id="L72">            var stmt = c.createStatement();</span>
+<span class="fc" id="L73">            ResultSet rs = stmt.executeQuery(sql);</span>
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L76">                String title = rs.getString(&quot;title&quot;);</span>
+<span class="fc" id="L77">                boolean isCompleted = rs.getBoolean(&quot;isCompleted&quot;);</span>
+
+<span class="fc" id="L79">                output.add(new Task(title, isCompleted));</span>
+<span class="fc" id="L80">            }</span>
+        }
+<span class="fc" id="L82">        return output;</span>
+    }
+
+    public void deleteTask(String title) throws SQLException {
+
+<span class="fc" id="L87">        String sql = &quot;DELETE FROM tasks WHERE title = ?&quot;;</span>
+
+<span class="fc" id="L89">        try (Connection c = DriverManager.getConnection(DBURL);) {</span>
+<span class="fc" id="L90">            var pstmt = c.prepareStatement(sql);</span>
+<span class="fc" id="L91">            pstmt.setString(1, title);</span>
+<span class="fc" id="L92">            pstmt.executeUpdate();</span>
+        }
+<span class="fc" id="L94">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

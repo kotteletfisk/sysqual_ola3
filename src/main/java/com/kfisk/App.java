@@ -2,7 +2,10 @@ package com.kfisk;
 
 import io.javalin.Javalin;
 
-public class App {
+public final class App {
+
+    private App() {
+    }
 
     public static void main(String[] args) throws Exception {
 
@@ -17,7 +20,7 @@ public class App {
 
         var controller = new RouteController(new PersistenceManager(dbUrl));
 
-        var app = Javalin.create()
+        Javalin.create()
                 .get("/api/getAllTasks", controller::getAllTasks)
                 .post("/api/createTask", controller::createTask)
                 .put("/api/setTaskComplete", controller::setTaskComplete)

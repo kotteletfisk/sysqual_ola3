@@ -14,7 +14,6 @@ import io.javalin.validation.ValidationException;
  */
 public class RequestValidator {
 
-    // Not really testable?
     public Task validateForCreation(Context ctx) throws ValidationException {
         return ctx.bodyValidator(Task.class)
                     .check(task -> task.title.length() > 0, "Title must be a least one character")

@@ -27,15 +27,8 @@ public class RouteController {
         try {
 
             Task task = validator.validateForCreation(ctx);
-            // Task task = ctx.bodyAsClass(Task.class);
-
-            // if (validator.validateForCreation(task)) {
             dao.createTask(task);
             ctx.status(201).json(task);
-            // } else {
-            //     ctx.status(HttpStatus.BAD_REQUEST)
-            //         .result("Bad input: " + task.toString());
-            // }
         } catch (SQLException e) {
             ctx.status(500).result("Error creating task: " + e.getMessage());
         }
