@@ -70,6 +70,12 @@ We had implemented Jacoco in our earlier assignment, and even with our new Route
 
 Report is found [here](reports/jacoco/index.html).
 
+### Peer and Software Review
+We did short technical reviews with all group members after implementing functionality and adding testing/analysis tools. The purpose was to showcase and discuss whatever value and potential problem the new functionality added. For exmaple we discussed the value of using PMD static analysis tool in contrast to using checkstyle, and how we could use it to enhance out workflow.
+We also discussed implementation logic. For example a reviewer brought up the point that a separate Javalin instance is created in the [RouteTest.java](src/test/java/com/kfisk/RouteTest.java) suite, which might create inconsistencies with test results if configurations are changed in the production application. This lead to ud deciding to make it a goal to define a common source of truth for configuration, so that both instances stay consistent. 
+
+At the end of the project, we had a Software Review meeting, where we walked through the application and decided on whether or not we believed to it had achieved its accept criteria, and was living up to its test plan. We decided that all functionality is present, and tested accordingly.
+
 
 ## Additional Reflection
 
